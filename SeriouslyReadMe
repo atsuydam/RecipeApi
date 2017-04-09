@@ -4,3 +4,13 @@ group project
 4/5/2017 Basic templates from the book added to start work from. 
 You will need to make sure you have the nodemodules in whatever location you're working from; the folder contains too many files for github to upload.
 Mongoose, express, bodyparser have been installed. If you add any other packages please note it!
+<b> Added Packages</b>
+express
+mongoose
+bodyparser
+Morgan added 4/9
+jsonwebtoken added 4/9  
+
+4/9 Amanda
+-I've filled out the User schema, put in password hashing, and user authentication.
+Username and email are required to be unique. A user will pass through the /login route in order to access their page.
