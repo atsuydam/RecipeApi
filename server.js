@@ -176,11 +176,21 @@ apiRouter.route('/user_recipes')
             }],
             direction: req.body.direction
         });
-        console.log(req.header.username);
         recipe.save(function(err){
             if (err) res.json(err);
             else res.json({ message: 'Recipe created!'});
         });
+    })
+    .get(function (req, res){
+        Recipe.find({postedBy: req.headers['username']}, 'title postedBy ingredients direction', function (err, data){
+            if (err)
+                res.send(err);
+            else if (!data)
+                return res.send({message: 'No recipes found'});
+            else
+                res.json(data);
+
+        })
     })
 // update a user's recipe
     .put(function (req, res) {
@@ -210,7 +220,7 @@ apiRouter.route('/user_recipes')
             // change body to however to it's passing but not param with the token. My first thought is list recipes
             // and delete from list with a bottom or something like he did in class with the to-do list example.
             name: req.body.recipe_name
-        }, function(err, movie){
+        }, function(err){
             if (err) return res.send(err);
             res.json({message: 'Successfully deleted by Name'});
             res.json({message:'That is not your recipe to delete'})
