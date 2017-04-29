@@ -236,20 +236,22 @@ apiRouter.use(function(req, res, next) {
 // these routes are register user only
 apiRouter.route('/user_recipes')
 // User posts a single recipe to the database
-    .post(function(req, res, next){
+    .post(function(req, res){
         var recipe = new Recipe({
             title: req.body.title,
             postedBy: req.headers['username'],
-            // Made some changes for testing, couldn't get ref to work so chaining username from login
-
-            // edited by kelsey
             ingredients: req.body.ingredient,
-
             direction: req.body.direction
         });
-        recipe.save(function(err){
-            if (err) res.json(err);
-            else res.json({ message: 'Recipe created!'});
+        var size = recipe.ingredients.length;
+        if (size < 3)
+            return res.send ("Please enter at least 3 ingredients");
+        else if (size >10)
+            return res.send ("For a 'bare' pantry please keep the ingredient list below 10 items.");
+        else
+            recipe.save(function(err){
+                if (err) res.json(err);
+                else res.json({ message: 'Recipe created!'});
         });
     })
     .get(function (req, res){
@@ -268,24 +270,22 @@ apiRouter.route('/user_recipes')
 
     // this function needs some love
     .put(function (req, res) {
-
         // use the user model to find the user we want
         Recipe.findOne({title: req.body.recipe_name}, function (err, recipe) {
-                recipe.ingredient = req.body.ingredient;
-            if (recipe.direction != req.body.direction)
-                recipe.direction = req.body.direction;
-            recipe.save(function (err) {
-                if (err) res.send(err);
-
-                // return a message
-                res.json({message: 'The Recipe was updated!'});
-            });
+            if (!recipe)
+                return res.send("recipe not found");
+            else
+                recipe.update({ingredients: req.body.ingredient}, {direction: req.body.direction}, function (err, res2){
+                if (err)
+                    return res.send("something borked");
+                return res.send ("recipe updated");
+                });
         })
     })
     // User deletes a single recipe in the database
     // kelsey - not sure what's going on with this function //Fixed: .remove wasn't a function
     .delete(function (req, res) {
-         Recipe.findOneAndRemove({title: req.body.recipe_name}, function(err) {
+         Recipe.findOneAndRemove({title: req.body.title}, function(err) {
              if (err)
                  return res.send({message: 'not deleted, who knows why. database demons, probably'});
              res.json({message: 'Successfully deleted by Name'});
