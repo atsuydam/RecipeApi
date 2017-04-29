@@ -72,13 +72,32 @@ apiRouter.route('/search/recipes')
 
 apiRouter.route('/search/ingredients')
     .get(function(req, res){
-        Recipe.find(
-            { "ingredients": { $regex: req.query.name, $options: 'i' } },
-            function(err, found){
-                if(err) return res.send(err);
-                res.json(found);
-            }
-        )
+        if (req.query.name3) {
+            Recipe.find(
+                { $and: [{"ingredients": { $regex: req.query.name}},{"ingredients": {$regex: req.query.name2}},
+                    {"ingredients": { $regex: req.query.name3}}]},
+                function (err, found) {
+                    if (err) return res.json("something fouled up");
+                    if (!found) return res.json("No matching recipes");
+                    return res.json(found);
+                })
+        }
+        else if (req.query.name2) {
+            Recipe.find(
+                { $and: [{"ingredients": { $regex: req.query.name}},{"ingredients": {$regex: req.query.name2}}]},
+                function (err, found) {
+                if (err) return res.json("something fouled up");
+                if (!found) return res.json("No matching recipes");
+                return res.json(found);
+            })
+        }
+        else
+        Recipe.find({ "ingredients" : { $regex: req.query.name, $options: 'i'}}, function
+            (err, found) {
+            if (err) return res.json("something fouled up");
+            if (!found) return res.json("No matching recipes");
+            return res.json(found);
+        })
     });
 
 apiRouter.route('/search/recipes_by_user')
