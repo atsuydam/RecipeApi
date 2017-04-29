@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 app.use(function(req, res, next) {
     //not entirely confident on these since they are bring up undefined but from the book
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT');
     next();
 });
 //console logging
@@ -253,6 +253,7 @@ apiRouter.route('/user_recipes')
         });
     })
     .get(function (req, res){
+        console.log('here');
         Recipe.find({postedBy: req.headers['username']}, 'title postedBy ingredients direction', function (err, data){
             if (err)
                 res.send(err);
@@ -261,31 +262,18 @@ apiRouter.route('/user_recipes')
             else
                 res.json(data);
 
-        })
+        });
     })
     // update a user's recipe
 
     // this function needs some love
-    // this function would allow any logged-on user to edit any recipe
     .put(function (req, res) {
 
         // use the user model to find the user we want
-        // Kelsey - also this function allows any user to edit a recipe, not just the user that posted it - is that the intention?
-        Recipe.findByTitle(req.params.recipe.name, function (err, recipe) {
-
-            if (err) res.send(err);
-            // update the recipe's info only if it's new
-            if (req.body.name) recipe.name = req.body.name;
-            // changed this part because I took out the measurement part
-            // have not tested this part in postman
-            if (req.body.ingredients.ingredient) recipe.ingredient = req.body.ingredients.ingredient;
-            if (req.body.ingredients.ingredient) recipe.in_name = req.body.ingredients.ingredient;
-
-            // Note from Kelsey: removed this stuff
-            //if (req.body.ingredients.measurement) recipe.measurement = req.body.ingredients.measurement;
-            //if (req.body.ingredients.amount) recipe.amount = req.body.ingredients.amount;
-
-            // save the recipe
+        Recipe.findOne({title: req.body.recipe_name}, function (err, recipe) {
+                recipe.ingredient = req.body.ingredient;
+            if (recipe.direction != req.body.direction)
+                recipe.direction = req.body.direction;
             recipe.save(function (err) {
                 if (err) res.send(err);
 
@@ -295,18 +283,14 @@ apiRouter.route('/user_recipes')
         })
     })
     // User deletes a single recipe in the database
-    // kelsey - not sure what's going on with this function
+    // kelsey - not sure what's going on with this function //Fixed: .remove wasn't a function
     .delete(function (req, res) {
-        Recipe.remove({
-            // change body to however to it's passing but not param with the token. My first thought is list recipes
-            // and delete from list with a bottom or something like he did in class with the to-do list example.
-            name: req.body.recipe_name
-        }, function(err){
-            if (err) return res.send(err);
-            res.json({message: 'Successfully deleted by Name'});
-            res.json({message:'That is not your recipe to delete'})
-        });
-    });
+         Recipe.findOneAndRemove({title: req.body.recipe_name}, function(err) {
+             if (err)
+                 return res.send({message: 'not deleted, who knows why. database demons, probably'});
+             res.json({message: 'Successfully deleted by Name'});
+         })
+   });
 
 
 //using base path
