@@ -294,11 +294,15 @@ apiRouter.route('/user_recipes')
             if (!recipe)
                 return res.send("recipe not found");
             else
-                recipe.update({ingredients: req.body.ingredient}, {direction: req.body.direction}, function (err, res2){
+                recipe.update({ingredients: req.body.ingredient}, function (err) {
+                    if (err)
+                        return res.send("something borked");
+                });
+                recipe.update({direction: req.body.direction}, function (err){
                 if (err)
                     return res.send("something borked");
                 return res.send ("recipe updated");
-                });
+            });
         })
     })
     // User deletes a single recipe in the database
