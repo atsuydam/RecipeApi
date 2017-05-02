@@ -11,6 +11,7 @@ bodyparser
 Morgan added 4/9
 jsonwebtoken added 4/9  
 jquery 5/1
+b-crypt 
 
 4/9 Amanda
 -I've filled out the User schema, put in password hashing, and user authentication.
